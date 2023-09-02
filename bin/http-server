@@ -5,11 +5,17 @@
 var chalk     = require('chalk'),
     os         = require('os'),
     httpServer = require('../lib/http-server'),
+    // portfinder 主要是用来寻找本地可用的 端口号 的，查找范围默认从 8000 端口开始！
+    // 地址：https://www.npmjs.com/package/portfinder
     portfinder = require('portfinder'),
     opener     = require('opener'),
 
     fs         = require('fs'),
+    // url 可基于传入的 url 链接构建一个 URL 对象，对象的key即为链接组成部分（比如 href/host/port/pathname等等），value为组成部分的值
+    // 地址：https://nodejs.org/dist/latest-v18.x/docs/api/url.html 
     url        = require('url');
+// minimist 主要是用来解析 npm script 脚本命令执行时传入的参数的！
+// 地址：https://www.npmjs.com/package/minimist
 var argv = require('minimist')(process.argv.slice(2), {
   alias: {
     tls: 'ssl'
@@ -19,6 +25,7 @@ var ifaces = os.networkInterfaces();
 
 process.title = 'http-server';
 
+// 输入 -h 或者 --help 参数，则打印 http-server 使用说明后退出程序
 if (argv.h || argv.help) {
   console.log([
     'usage: http-server [path] [options]',
@@ -75,11 +82,14 @@ var port = argv.p || argv.port || parseInt(process.env.PORT, 10),
     version = argv.v || argv.version,
     logger;
 
+// http-proxy 库中包含 true/false 的配置项
 var proxyOptionsBooleanProps = [
   'ws', 'xfwd', 'secure', 'toProxy', 'prependPath', 'ignorePath', 'changeOrigin',
   'preserveHeaderKeyCase', 'followRedirects', 'selfHandleResponse'
 ];
 
+// 通过类似于 “--proxy-options.secure false” 参数传入！
+// proxyOptions 会是一个对象
 if (proxyOptions) {
   Object.keys(proxyOptions).forEach(function (key) {
     if (proxyOptionsBooleanProps.indexOf(key) > -1) {
@@ -88,6 +98,7 @@ if (proxyOptions) {
   });
 }
 
+// 非 silent，则控制台终端输出日志信息
 if (!argv.s && !argv.silent) {
   logger = {
     info: console.log,
@@ -120,6 +131,7 @@ else if (chalk) {
   };
 }
 
+// 如果传入 --version，则打印 http-server 的版本号然后退出程序
 if (version) {
   logger.info('v' + require('../package.json').version);
   process.exit();
@@ -169,6 +181,8 @@ function listen(port) {
     }
     catch (err) {
       logger.info(chalk.red('Error: Invalid proxy url'));
+      // 未传入 exitCode 则默认为 0，表示正常退出程序；
+      // 如果传入的 exitCode 为 1，则表示异常退出程序
       process.exit(1);
     }
   }
@@ -224,6 +238,7 @@ function listen(port) {
     if (argv.a && host !== '0.0.0.0') {
       logger.info(`  ${protocol}${host}:${chalk.green(port.toString())}`);
     } else {
+      // 未通过 -a 参数指定 host，则默认通过 os 模块把所有 IPv4 的地址输出出来！
       Object.keys(ifaces).forEach(function (dev) {
         ifaces[dev].forEach(function (details) {
           if (details.family === 'IPv4') {
@@ -250,6 +265,7 @@ function listen(port) {
         openUrl += argv.o[0] === '/' ? argv.o : '/' + argv.o;
       }
       logger.info('Open: ' + openUrl);
+      // 通过 opener 库，把传入的 -o 参数后边的 路径 拼接上 origin 信息后，在浏览器中打开！
       opener(openUrl);
     }
 
@@ -258,11 +274,16 @@ function listen(port) {
   });
 }
 
+// windows 系统
 if (process.platform === 'win32') {
+  // The `readline` module provides an interface for reading data from a Readable stream (such as `process.stdin`) one line at a time.
+  // 地址：https://nodejs.org/dist/latest-v18.x/docs/api/readline.html#readlinecreateinterfaceoptions
   require('readline').createInterface({
     input: process.stdin,
     output: process.stdout
   }).on('SIGINT', function () {
+  // The 'SIGINT' event is emitted whenever the input stream receives a `Ctrl+C` input, known typically as SIGINT.
+  // If there are no 'SIGINT' event listeners registered when the input stream receives a SIGINT, the 'pause' event will be emitted.
     process.emit('SIGINT');
   });
 }

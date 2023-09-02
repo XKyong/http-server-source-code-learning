@@ -1,0 +1,29 @@
+{
+	"files": [
+		{
+			"path": "lib/http-server.js",
+			"bookmarks": [
+				{
+					"line": 167,
+					"column": 19,
+					"label": "before作为中间件栈"
+				},
+				{
+					"line": 186,
+					"column": 40,
+					"label": "使用union启用 web 服务"
+				}
+			]
+		},
+		{
+			"path": "lib/core/index.js",
+			"bookmarks": [
+				{
+					"line": 180,
+					"column": 46,
+					"label": "文件/文件夹响应的处理核心代码"
+				}
+			]
+		}
+	]
+}

@@ -2,6 +2,134 @@
 [![npm](https://img.shields.io/npm/v/http-server.svg?style=flat-square)](https://www.npmjs.com/package/http-server) [![homebrew](https://img.shields.io/homebrew/v/http-server?style=flat-square)](https://formulae.brew.sh/formula/http-server) [![npm downloads](https://img.shields.io/npm/dm/http-server?color=blue&label=npm%20downloads&style=flat-square)](https://www.npmjs.com/package/http-server)
 [![license](https://img.shields.io/github/license/http-party/http-server.svg?style=flat-square)](https://github.com/http-party/http-server)
 
+# 源码调试
+
+## 1. `node ./bin/http-server` 启动过程
+
+首先，在项目根目录下创建 `.vscode/launch.json` 文件，内容如下：
+
+```json
+{
+  // Use IntelliSense to learn about possible attributes.
+  // Hover to view descriptions of existing attributes.
+  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Launch Program",
+      "skipFiles": [
+        "<node_internals>/**"
+      ],
+      "program": "${workspaceFolder}\\bin\\http-server",
+      "stopOnEntry": true,
+      "console": "integratedTerminal"
+    }
+  ]
+}
+```
+
+然后进入 `/bin/http-server` 文件中，敲击 `F5` 即可开始调试。
+
+
+
+## 2. `http-server` 在一个拥有 `index.html` 文件的目录启动
+
+当我们使用如下命令启动服务时：
+
+```bash
+$ http-server [path] [options]
+```
+
+当 `path` 未传入时，如果当前启动的目录中存在 `./public` 目录，则 `path` 默认是该 `./public`，否则 `path` 为 `./` 即当前目录。
+
+因此，我们进入 `http-server-source-code-learning` 根目录，然后分别通过如下2个命令启动服务：
+
+```bash
+# 等价于：node ./bin/http-server ./public
+$ node ./bin/http-server
+
+# 显式指定路径为 ./nginx-html
+$ node ./bin/http-server ./nginx-html
+```
+
+对于调试，我们需要修改 `.vscode/launch.json` 文件为：
+
+```json
+{
+  // Use IntelliSense to learn about possible attributes.
+  // Hover to view descriptions of existing attributes.
+  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Launch Program",
+      "skipFiles": [
+        "<node_internals>/**"
+      ],
+      "program": "${workspaceFolder}\\bin\\http-server",
+      "stopOnEntry": true,
+      "console": "integratedTerminal",
+      "args": ["./nginx-html"]
+    }
+  ]
+}
+```
+
+然后进入 `/bin/http-server` 文件中，敲击 `F5` 即可开始调试。
+
+调试时，记得在 `lib/core/index.js` 文件中的 `middleware` 函数中打上断点。
+
+在浏览器中打开 `http-server` 启动的服务页面后，理清楚代码执行流程。
+
+
+
+
+
+## 3. `http-server` 在一个没有 `index.html` 文件的目录启动
+
+通过如下命令指定 `path` 为当前根目录路径启动服务：
+
+```bash
+$ node ./bin/http-server ./
+```
+
+对于调试，我们需要修改 `.vscode/launch.json` 文件为：
+
+```json
+{
+  // Use IntelliSense to learn about possible attributes.
+  // Hover to view descriptions of existing attributes.
+  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Launch Program",
+      "skipFiles": [
+        "<node_internals>/**"
+      ],
+      "program": "${workspaceFolder}\\bin\\http-server",
+      "stopOnEntry": true,
+      "console": "integratedTerminal",
+      "args": ["./"]
+    }
+  ]
+}
+```
+
+记得在 `lib/core/index.js` 文件中的 `middleware` 函数中打上断点。
+
+在浏览器中打开 `http-server` 启动的服务页面后，理清楚代码执行流程。
+
+
+
+
+
 # http-server: a simple static HTTP server
 
 `http-server` is a simple, zero-configuration command-line static HTTP server.  It is powerful enough for production usage, but it's simple and hackable enough to be used for testing, local development and learning.
@@ -25,7 +153,7 @@ This will install `http-server` globally so that it may be run from the command 
 #### Globally via Homebrew
 
     brew install http-server
-     
+
 #### As a dependency in your `npm` package:
 
     npm install http-server
@@ -50,7 +178,7 @@ This will install `http-server` globally so that it may be run from the command 
 |`-i`   | Display autoIndex | `true` |
 |`-g` or `--gzip` |When enabled it will serve `./public/some-file.js.gz` in place of `./public/some-file.js` when a gzipped version of the file exists and the request accepts gzip encoding. If brotli is also enabled, it will try to serve brotli first.|`false`|
 |`-b` or `--brotli`|When enabled it will serve `./public/some-file.js.br` in place of `./public/some-file.js` when a brotli compressed version of the file exists and the request accepts `br` encoding. If gzip is also enabled, it will try to serve brotli first. |`false`|
-|`-e` or `--ext`  |Default file extension if none supplied |`html` | 
+|`-e` or `--ext`  |Default file extension if none supplied |`html` |
 |`-s` or `--silent` |Suppress log messages from output  | |
 |`--cors` |Enable CORS via the `Access-Control-Allow-Origin` header  | |
 |`-o [path]` |Open browser window after starting the server. Optionally provide a URL path to open. e.g.: -o /other/dir/ | |
@@ -62,7 +190,7 @@ This will install `http-server` globally so that it may be run from the command 
 |`--username` |Username for basic authentication | |
 |`--password` |Password for basic authentication | |
 |`-S`, `--tls` or `--ssl` |Enable secure request serving with TLS/SSL (HTTPS)|`false`|
-|`-C` or `--cert` |Path to ssl cert file |`cert.pem` | 
+|`-C` or `--cert` |Path to ssl cert file |`cert.pem` |
 |`-K` or `--key` |Path to ssl key file |`key.pem` |
 |`-r` or `--robots` | Automatically provide a /robots.txt (The content of which defaults to `User-agent: *\nDisallow: /`)  | `false` |
 |`--no-dotfiles` |Do not show dotfiles| |

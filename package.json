@@ -100,6 +100,7 @@
     "url-join": "^4.0.1"
   },
   "devDependencies": {
+    "connect": "^3.7.0",
     "eol": "^0.9.1",
     "eslint": "^4.19.1",
     "eslint-config-populist": "^4.2.0",

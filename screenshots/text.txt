@@ -1,0 +1,1 @@
+用于测试 http-server 在一个没有 index.html 文件夹启动时的执行过程！

@@ -6,6 +6,7 @@
     "valid-jsdoc": "warn",
     "no-undefined": "warn",
     "comma-dangle": "warn",
-    "callback-return": ["warn", ["next"]]
+    "callback-return": ["warn", ["next"]],
+    "linebreak-style": "off"
   }
 }
