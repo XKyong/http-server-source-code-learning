@@ -81,7 +81,7 @@ $ node ./bin/http-server ./nginx-html
 
 然后进入 `/bin/http-server` 文件中，敲击 `F5` 即可开始调试。
 
-调试时，记得在 `lib/core/index.js` 文件中的 `middleware` 函数中打上断点。
+调试时，记得在 `lib/core/index.js` 文件中的 `middleware` 函数中打上断点，文件处理核心逻辑在 `serve` 函数中。
 
 在浏览器中打开 `http-server` 启动的服务页面后，理清楚代码执行流程。
 
@@ -94,8 +94,12 @@ $ node ./bin/http-server ./nginx-html
 通过如下命令指定 `path` 为当前根目录路径启动服务：
 
 ```bash
-$ node ./bin/http-server ./
+$ node ./bin/http-server ./dist
 ```
+
+浏览器打开看到的页面如下：
+
+![image-20230903122719779](img/README/image-20230903122719779.png)
 
 对于调试，我们需要修改 `.vscode/launch.json` 文件为：
 
@@ -116,13 +120,13 @@ $ node ./bin/http-server ./
       "program": "${workspaceFolder}\\bin\\http-server",
       "stopOnEntry": true,
       "console": "integratedTerminal",
-      "args": ["./"]
+      "args": ["./dist"]
     }
   ]
 }
 ```
 
-记得在 `lib/core/index.js` 文件中的 `middleware` 函数中打上断点。
+记得在 `lib/core/index.js` 文件中的 `middleware` 函数中打上断点，文件夹处理核心逻辑在 `lib/core/show-dir` 目录中。
 
 在浏览器中打开 `http-server` 启动的服务页面后，理清楚代码执行流程。
 
@@ -186,14 +190,14 @@ This will install `http-server` globally so that it may be run from the command 
 |`-U` or `--utc` |Use UTC time format in log messages.| |
 |`--log-ip` |Enable logging of the client's IP address |`false` |
 |`-P` or `--proxy` |Proxies all requests which can't be resolved locally to the given url. e.g.: -P http://someurl.com | |
-|`--proxy-options` |Pass proxy [options](https://github.com/http-party/node-http-proxy#options) using nested dotted objects. e.g.: --proxy-options.secure false |
+|`--proxy-options` |Pass proxy [options](https://github.com/http-party/node-http-proxy#options) using nested dotted objects. e.g.: --proxy-options.secure false ||
 |`--username` |Username for basic authentication | |
 |`--password` |Password for basic authentication | |
 |`-S`, `--tls` or `--ssl` |Enable secure request serving with TLS/SSL (HTTPS)|`false`|
 |`-C` or `--cert` |Path to ssl cert file |`cert.pem` |
 |`-K` or `--key` |Path to ssl key file |`key.pem` |
 |`-r` or `--robots` | Automatically provide a /robots.txt (The content of which defaults to `User-agent: *\nDisallow: /`)  | `false` |
-|`--no-dotfiles` |Do not show dotfiles| |
+|`--no-dotfiles` |Do not show dotfiles，即不展示类似 `.gitignore`、`.eslintrc.json` 这种文件| |
 |`--mimetypes` |Path to a .types file for custom mimetype definition| |
 |`-h` or `--help` |Print this list and exit. |   |
 |`-v` or `--version`|Print the version and exit. | |
