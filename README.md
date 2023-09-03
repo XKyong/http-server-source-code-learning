@@ -4,6 +4,19 @@
 
 # 源码调试
 
+> 关于代码的执行流程的更多细节，可配合源代码中的注释进行调试理解！
+
+## 文件结构
+
+几个核心的代码文件：
+
+- `bin/http-server`：安装 `http-server` 依赖后，当我们终端输入 `http-server ./` 时，运行的就是这个文件；
+- `lib/http-server.js`：使用 `union` 依赖创建 web 服务，为 `http-server` 提供静态资源服务，同时绑定了 `union` 中间件，集成更多能力（例如web proxy、https服务等）；
+- `lib/core/index.js`：在浏览器中访问 `http-server` 启动的服务页面时，文件或者文件夹的执行流程主要在这个文件的 `middleware(req, res, next)` 函数中进行处理；
+- `lib/core/show-dir/index.js`：启动 `http-server` 为文件夹服务时，文件夹返回浏览器的渲染内容，主要在这个文件中处理。
+
+
+
 ## 1. `node ./bin/http-server` 启动过程
 
 首先，在项目根目录下创建 `.vscode/launch.json` 文件，内容如下：
@@ -42,12 +55,32 @@
 $ http-server [path] [options]
 ```
 
-当 `path` 未传入时，如果当前启动的目录中存在 `./public` 目录，则 `path` 默认是该 `./public`，否则 `path` 为 `./` 即当前目录。
+当 `path` 未传入时，如果当前启动的目录中存在 `./public` 目录，则 `path` 默认是该 `./public`，否则 `path` 为 `./` 即当前目录，如此处理的源代码在 `lib/http-server.js` 文件中 `HttpServer` 构造函数中：
+
+```js
+function HttpServer(options) {
+  options = options || {};
+
+  if (options.root) {
+    this.root = options.root;
+  } else {
+    try {
+      // eslint-disable-next-line no-sync
+      fs.lstatSync('./public');
+      this.root = './public';
+    } catch (err) {
+      this.root = './';
+    }
+  }
+  
+  // 省略其他...
+}
+```
 
 因此，我们进入 `http-server-source-code-learning` 根目录，然后分别通过如下2个命令启动服务：
 
 ```bash
-# 等价于：node ./bin/http-server ./public
+# 等价于：`node ./bin/http-server ./public`，因为 public 文件夹存在
 $ node ./bin/http-server
 
 # 显式指定路径为 ./nginx-html
@@ -81,7 +114,7 @@ $ node ./bin/http-server ./nginx-html
 
 然后进入 `/bin/http-server` 文件中，敲击 `F5` 即可开始调试。
 
-调试时，记得在 `lib/core/index.js` 文件中的 `middleware` 函数中打上断点，文件处理核心逻辑在 `serve` 函数中。
+调试时，记得在 `lib/core/index.js` 文件中的 `middleware(req, res, next)` 函数中打上断点，文件处理核心逻辑在`middleware` 函数中的 `serve(stat)` 中。
 
 在浏览器中打开 `http-server` 启动的服务页面后，理清楚代码执行流程。
 
@@ -126,7 +159,9 @@ $ node ./bin/http-server ./dist
 }
 ```
 
-记得在 `lib/core/index.js` 文件中的 `middleware` 函数中打上断点，文件夹处理核心逻辑在 `lib/core/show-dir` 目录中。
+记得在 `lib/core/index.js` 文件中的 `middleware(req, res, next)` 函数中打上断点，文件夹处理核心逻辑在 `lib/core/show-dir` 目录中。
+
+调试时发现，访问一个目录时，会先尝试返回该目录下 `index.html` 或者 `404.html` 文件，如果这2个文件未找到，则才将该目录作为文件夹处理（前提是 `opts.showDir` 为 `true`），核心处理逻辑放在 `showDir(opts, stat)(req, res)` 方法中。
 
 在浏览器中打开 `http-server` 启动的服务页面后，理清楚代码执行流程。
 

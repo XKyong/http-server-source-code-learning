@@ -14,7 +14,7 @@
       "program": "${workspaceFolder}\\bin\\http-server",
       "stopOnEntry": true, 
       "console": "integratedTerminal",
-      "args": ["./"]
+      "args": ["./dist"]
     }
   ]
 }
